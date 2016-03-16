@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.tvajjala.domain.UserEntity;
 import com.tvajjala.repository.UserRepository;
 
 @Controller
@@ -21,7 +20,7 @@ public class HomeController {
     public String home() {
 
         System.out.println(" userRepository :" + userRepository);
-        userRepository.save(new UserEntity("Thiru", "password"));
+        // userRepository.save(new UserEntity());
 
         final Locale locale = LocaleContextHolder.getLocale();
         System.out.println(locale);

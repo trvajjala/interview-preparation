@@ -67,7 +67,7 @@ public class DatabaseConfig {
     public EntityManagerFactory entityManagerFactory() {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        // em.setMappingResources("META-INF/orm.xml"); // for auditing AuditingEntityListener
+        em.setMappingResources("META-INF/orm.xml"); // for auditing AuditingEntityListener
         em.setPackagesToScan(new String[] { "com.tvajjala.domain" });
 
         em.setJpaVendorAdapter(jpaVendorAdapter());

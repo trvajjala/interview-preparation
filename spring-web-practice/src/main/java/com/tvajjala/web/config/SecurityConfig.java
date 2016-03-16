@@ -7,7 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 
-import com.tvajjala.web.service.UserAuthenticationService;
+import com.tvajjala.web.service.AuthenticationService;
 
 /**
  * the @EnableWebMvcSecurity annotation configures a Spring MVC argument resolver <br>
@@ -24,7 +24,7 @@ import com.tvajjala.web.service.UserAuthenticationService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    UserAuthenticationService userAuthenticationService;
+    AuthenticationService authenticationService;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -36,8 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        // auth.userDetailsService(userAuthenticationService);
-        auth.inMemoryAuthentication().withUser("admin").password("password").roles("USER");
+        auth.userDetailsService(authenticationService);
 
     }
 }

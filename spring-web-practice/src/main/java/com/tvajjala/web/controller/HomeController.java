@@ -24,6 +24,7 @@ public class HomeController {
 
         final Locale locale = LocaleContextHolder.getLocale();
         System.out.println(locale);
+
         return "home";
     }
 }

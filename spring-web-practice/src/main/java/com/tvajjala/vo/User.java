@@ -10,13 +10,13 @@ public class User implements UserDetails {
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8825646974241476909L;
 
-    private String id;
+    private Long id;
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

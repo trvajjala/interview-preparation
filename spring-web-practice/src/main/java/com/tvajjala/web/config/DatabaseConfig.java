@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
@@ -18,6 +19,7 @@ import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcesso
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 
@@ -32,6 +34,8 @@ import com.jolbox.bonecp.BoneCPDataSource;
  */
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", repositoryImplementationPostfix = "Helper", transactionManagerRef = "transactionManager", basePackages = { "com.tvajjala.repository" })
+@EnableTransactionManagement
+@ImportResource(value = { "classpath:cache-context.xml" })
 public class DatabaseConfig {
 
     @Bean
@@ -81,7 +85,7 @@ public class DatabaseConfig {
         final Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop"); // TODO: create-drop,create,none
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
-        properties.setProperty("hibernate.show_sql", "false");
+        properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.format_sql", "false");
         properties.setProperty("hibernate.ejb.naming_strategy", DatabaseNamingStrategy.class.getName());// fully qualifed name a string
         return properties;
@@ -106,6 +110,7 @@ public class DatabaseConfig {
      *
      * @return PersistenceAnnotationBeanPostProcessor
      */
+
     @Bean
     public PersistenceAnnotationBeanPostProcessor paPostProcessor() {
         return new PersistenceAnnotationBeanPostProcessor();
@@ -118,7 +123,6 @@ public class DatabaseConfig {
 
     @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager() {
-
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory());
         return transactionManager;

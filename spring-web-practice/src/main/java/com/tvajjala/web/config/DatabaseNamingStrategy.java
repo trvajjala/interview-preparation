@@ -9,7 +9,7 @@ import org.hibernate.cfg.ImprovedNamingStrategy;
 public class DatabaseNamingStrategy extends ImprovedNamingStrategy {
 
     /** The Constant PREFIX. */
-    private static final String PREFIX = "WF_";
+    private static final String PREFIX = "TR_";
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 5118322121741445924L;

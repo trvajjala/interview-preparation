@@ -1,5 +1,7 @@
 package com.tvajjala.hql;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -37,12 +39,18 @@ public class HQLExample {
         int start = 0;
 
         do {// pagination
-            query = session.createQuery("FROM LogicalEmployee ");
+            query = session.createQuery("SELECT name FROM LogicalEmployee ");
             query.setFirstResult(start);
             query.setMaxResults(pageSize);
             start = start + pageSize;
             System.out.println(query.list());
         } while (maxCount > start);
+
+        query = session.createQuery("SELECT new map(id,name) FROM LogicalEmployee");
+
+        final List<Map<Long, String>> lm = query.list();
+
+        System.out.println(lm);
 
         session.close();
 

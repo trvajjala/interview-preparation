@@ -1,6 +1,7 @@
 package com.tvajjala.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +19,6 @@ public class CustomServlet extends HttpServlet {
      */
     public CustomServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -28,7 +28,9 @@ public class CustomServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         System.out.println("Custom Servlet invoked ");
-
+        final PrintWriter out = response.getWriter();
+        out.write("Welcome . This is from custom servlet");
+        out.close();
     }
 
     /**

@@ -14,6 +14,7 @@ public class UserCondition implements Condition {
 
         final Environment env = context.getEnvironment();
         final String[] profiles = env.getActiveProfiles();
+
         for (final String profile : profiles) {
             System.out.println("Active Profiles " + profile);
         }

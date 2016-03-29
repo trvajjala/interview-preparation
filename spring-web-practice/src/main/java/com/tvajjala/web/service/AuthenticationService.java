@@ -16,7 +16,6 @@
 
 package com.tvajjala.web.service;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,25 +35,10 @@ import com.tvajjala.vo.User;
  *
  */
 @Service
-public class AuthenticationService implements UserDetailsService, InitializingBean {
+public class AuthenticationService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-        final UserEntity userEntity = new UserEntity();
-        userEntity.setUsername("admin");
-        userEntity.setPassword("1234");
-        userEntity.setAccountNonExpired(true);
-        userEntity.setAccountNonLocked(true);
-        userEntity.setEnabled(true);
-        userEntity.setCredentialsNonExpired(true);
-        // TODO: no roles configures
-
-        userRepository.save(userEntity);
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

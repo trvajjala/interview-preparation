@@ -53,8 +53,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     public HandlerInterceptor performanceInterceptor() {
-        PerformanceInterceptor interceptor;
-        interceptor = new PerformanceInterceptor();
+        final PerformanceInterceptor interceptor = new PerformanceInterceptor();
         return interceptor;
     }
 

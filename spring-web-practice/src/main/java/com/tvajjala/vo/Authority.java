@@ -15,13 +15,13 @@ public class Authority implements Serializable, GrantedAuthority, ConfigAttribut
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2209238250163252206L;
 
-    private String id;
+    private Long id;
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

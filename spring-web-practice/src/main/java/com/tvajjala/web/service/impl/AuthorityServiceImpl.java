@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tvajjala.domain.AuthorityEntity;
-import com.tvajjala.exception.RecordNotFoundException;
+import com.tvajjala.exception.ResourceNotFoundException;
 import com.tvajjala.exception.ServiceException;
-import com.tvajjala.repository.AuthorityRepository;
-import com.tvajjala.vo.Authority;
+import com.tvajjala.persistence.domain.AuthorityEntity;
+import com.tvajjala.persistence.repository.AuthorityRepository;
+import com.tvajjala.persistence.vo.Authority;
 import com.tvajjala.web.service.AuthorityService;
 
 /**
@@ -50,12 +50,12 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public Authority getAuthority(final String authorityName) throws RecordNotFoundException {
+    public Authority getAuthority(final String authorityName) throws ResourceNotFoundException {
 
         final AuthorityEntity authorityEntity = authorityRepository.findByAuthority(authorityName);
 
         if (authorityEntity == null) {
-            throw new RecordNotFoundException(authorityName, "record not exists with property : " + authorityName);
+            throw new ResourceNotFoundException("record not exists with property : " + authorityName);
         }
 
         final Authority authority = new Authority();

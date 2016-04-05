@@ -2,9 +2,9 @@ package com.tvajjala.web.service;
 
 import java.util.List;
 
-import com.tvajjala.exception.RecordNotFoundException;
+import com.tvajjala.exception.ResourceNotFoundException;
 import com.tvajjala.exception.ServiceException;
-import com.tvajjala.vo.Authority;
+import com.tvajjala.persistence.vo.Authority;
 
 /**
  * The Interface AuthorityService.
@@ -22,9 +22,9 @@ public interface AuthorityService {
      *
      * @param authority
      * @return authority with primary key
-     * @throws RecordNotFoundException
+     * @throws ResourceNotFoundException
      */
-    Authority getAuthority(String authority) throws RecordNotFoundException;
+    Authority getAuthority(String authority) throws ResourceNotFoundException;
 
     /**
      *

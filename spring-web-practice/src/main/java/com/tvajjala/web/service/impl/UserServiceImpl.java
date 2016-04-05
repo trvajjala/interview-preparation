@@ -8,13 +8,13 @@ import org.springframework.security.authentication.encoding.BasePasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tvajjala.domain.UserEntity;
-import com.tvajjala.exception.RecordNotFoundException;
+import com.tvajjala.exception.ResourceNotFoundException;
 import com.tvajjala.exception.ServiceException;
-import com.tvajjala.repository.AuthorityRepository;
-import com.tvajjala.repository.UserRepository;
-import com.tvajjala.vo.Authority;
-import com.tvajjala.vo.User;
+import com.tvajjala.persistence.domain.UserEntity;
+import com.tvajjala.persistence.repository.AuthorityRepository;
+import com.tvajjala.persistence.repository.UserRepository;
+import com.tvajjala.persistence.vo.Authority;
+import com.tvajjala.persistence.vo.User;
 import com.tvajjala.web.service.UserService;
 
 /**
@@ -44,12 +44,12 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Override
-    public void deleteUser(final Long id) throws RecordNotFoundException {
+    public void deleteUser(final Long id) throws ResourceNotFoundException {
         final UserEntity userEntity = userRepository.findOne(id);
 
         if (userEntity == null) {
             logger.info("There is not record with this id ");
-            throw new RecordNotFoundException("Record not exists with id :: " + id);
+            throw new ResourceNotFoundException("Record not exists with id :: " + id);
         }
 
         userEntity.getAuthorities().clear();
@@ -68,6 +68,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User saveUser(final User user) throws ServiceException {
 
+        encryptPassword(user);
+
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(user.getUsername());
         userEntity.setPassword(user.getPassword());
@@ -84,14 +86,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(final User user) throws RecordNotFoundException {
+    public User updateUser(final User user) throws ResourceNotFoundException {
         final UserEntity userEntity = userRepository.findOne(user.getId());
 
         if (userEntity == null) {
-            throw new RecordNotFoundException("Record not found with id :: " + user.getId());
+            throw new ResourceNotFoundException("Record not found with id :: " + user.getId());
         }
 
         return user;
+    }
+
+    @Override
+    public User getUserByUsername(String username) throws ResourceNotFoundException {
+
+        final UserEntity userEntity = userRepository.findByUsername(username);
+        System.out.println(" userEntity " + userEntity);
+
+        final User user = new User();
+        user.setUsername(userEntity.getUsername());
+        user.setPassword("[PROTECTED]");
+
+        System.out.println("returning user " + user);
+        return user;
+    }
+
+    @Override
+    public long getUserCount() {
+        return userRepository.count();
     }
 
 }

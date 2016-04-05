@@ -5,10 +5,11 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.hibernate.annotations.common.util.StringHelper;
+import org.hibernate.cfg.ImprovedNamingStrategy;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
@@ -21,23 +22,37 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.config.GroupConfig;
+import com.hazelcast.config.MulticastConfig;
+import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import com.jolbox.bonecp.BoneCPDataSource;
+import com.tvajjala.persistence.domain.UserEntity;
 
 /**
  * Spring Data JPA associates the implementation class with the interface because the implementation’s name is based on the name of the interface. The Impl
- * postfix is only the default, though. If you’d prefer to use some other postfix, you need to specify it when configuring @EnableJpaRepositories by setting the
- * repository-ImplementationPostfix attribute:
+ * post-fix is only the default, though. If you’d prefer to use some other post-fix, you need to specify it when configuring @EnableJpaRepositories by setting
+ * the repository-ImplementationPostfix attribute:
  *
- * @EnableJpaRepositories( basePackages="com.habuma.spittr.db", repositoryImplementationPostfix="Helper")
+ * @EnableJpaRepositories( basePackages=""com.tvajjala.persistence.repository", repositoryImplementationPostfix="Helper")
  * @author ThirupathiReddy V
  *
  */
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", repositoryImplementationPostfix = "Helper", transactionManagerRef = "transactionManager", basePackages = { "com.tvajjala.repository" })
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackages = { "com.tvajjala.persistence.repository" }, repositoryImplementationPostfix = "Helper", transactionManagerRef = "transactionManager")
 @EnableTransactionManagement
-@ImportResource(value = { "classpath:cache-context.xml" })
+// @ImportResource(value = { "classpath:cache-context.xml" })
+// hazel-cast configuration in XML
 public class DatabaseConfig {
 
+    /**
+     * spring boot looks for the bean with name 'dataSource'.if not found it will check application.properties from the class-path try to create one dataSource
+     * with the given properties.
+     *
+     * @return DataSource
+     */
     @Bean
     public DataSource dataSource() {
         // instantiate, configure and return production DataSource
@@ -56,11 +71,17 @@ public class DatabaseConfig {
         return dataSource;
     }
 
-    // @Bean// this is hibernate sesionFactory
+    /**
+     * enable @Bean annotation if you want to use hibernate instead of spring data JPA repositories
+     *
+     * @param dataSource
+     * @return LocalSessionFactoryBean
+     */
+    // @Bean
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         final LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
         sfb.setDataSource(dataSource);
-        sfb.setPackagesToScan(new String[] { "com.tvajjala.domain" });
+        sfb.setPackagesToScan(new String[] { "com.tvajjala.persistence.domain" });
         final Properties props = new Properties();
         props.setProperty("dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
         sfb.setHibernateProperties(props);
@@ -72,12 +93,12 @@ public class DatabaseConfig {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
         // em.setMappingResources("META-INF/orm.xml"); // for auditing AuditingEntityListener
-        em.setPackagesToScan(new String[] { "com.tvajjala.domain" });
-
+        em.setPackagesToScan(new String[] { UserEntity.class.getPackage().getName() });
         em.setJpaVendorAdapter(jpaVendorAdapter());
         em.setJpaProperties(additionalJpaProperties());
-        em.setPersistenceUnitName("JPA-PU");
+        em.setPersistenceUnitName("TRVAJJALA-PersistenceUnit");
         em.afterPropertiesSet();
+        System.err.println("Created entityManager with dataSource API " + em.getDataSource().getClass());
         return em.getObject();
     }
 
@@ -85,7 +106,7 @@ public class DatabaseConfig {
         final Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop"); // TODO: create-drop,create,none
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
-        properties.setProperty("hibernate.show_sql", "true");
+        properties.setProperty("hibernate.show_sql", "false");
         properties.setProperty("hibernate.format_sql", "false");
         properties.setProperty("hibernate.ejb.naming_strategy", DatabaseNamingStrategy.class.getName());// fully qualifed name a string
         return properties;
@@ -96,7 +117,7 @@ public class DatabaseConfig {
         final HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setDatabase(Database.MYSQL);
         adapter.setShowSql(true);
-        adapter.setGenerateDdl(false);
+        adapter.setGenerateDdl(true);
         adapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
         return adapter;
     }
@@ -116,6 +137,16 @@ public class DatabaseConfig {
         return new PersistenceAnnotationBeanPostProcessor();
     }
 
+    /**
+     * Bean post-processor that automatically applies persistence exception translation to any bean marked with Spring's @Repository annotation, adding a
+     * corresponding PersistenceExceptionTranslationAdvisor to the exposed proxy (either an existing AOP proxy or a newly generated proxy that implements all of
+     * the target's interfaces).
+     *
+     * Translates native resource exceptions to Spring's DataAccessException hierarchy. Autodetects beans that implement the PersistenceExceptionTranslator
+     * interface, which are subsequently asked to translate candidate exceptions.
+     *
+     * @return PersistenceExceptionTranslationPostProcessor
+     */
     @Bean
     public BeanPostProcessor persistenceTranslation() {
         return new PersistenceExceptionTranslationPostProcessor();
@@ -126,6 +157,68 @@ public class DatabaseConfig {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory());
         return transactionManager;
+    }
+
+    @Bean
+    public HazelcastInstance hazelcastInstance() {
+        final Config config = new Config();
+        final GroupConfig groupConfig = new GroupConfig();
+        groupConfig.setName("trvajjala");
+        groupConfig.setPassword("trvajjala");
+        config.setGroupConfig(groupConfig);
+
+        final NetworkConfig networkConfig = config.getNetworkConfig();
+        final MulticastConfig multicastConfig = new MulticastConfig();
+        multicastConfig.setEnabled(false);
+        networkConfig.getJoin().setMulticastConfig(multicastConfig);
+        networkConfig.getJoin().getAwsConfig().setEnabled(false);
+        networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
+
+        final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+        return hazelcastInstance;
+    }
+
+    /**
+     * The Class DatabaseNamingStrategy will load at deployment time to give the table names dynamically based on Entity names with prefix given.
+     */
+    public static class DatabaseNamingStrategy extends ImprovedNamingStrategy {
+
+        /** The Constant PREFIX. */
+        private static final String PREFIX = "TR_";
+
+        /** The Constant serialVersionUID. */
+        private static final long serialVersionUID = 5118322121741445924L;
+
+        /**
+         * Transforms class names to table names by using the described naming conventions.
+         *
+         * @param className
+         *            the class name
+         * @return The constructed table name.
+         */
+        @Override
+        public String classToTableName(final String className) {
+
+            return DatabaseNamingStrategy.addUnderscoredAndCovertToUppercase(DatabaseNamingStrategy.PREFIX
+                    + StringHelper.unqualify(className).replaceAll("Entity", ""));
+        }
+
+        @Override
+        public String tableName(final String tableName) {
+            return DatabaseNamingStrategy.addUnderscoredAndCovertToUppercase(DatabaseNamingStrategy.PREFIX + tableName);
+        }
+
+        /**
+         * Adds the underscored and covert to upperCase.
+         *
+         * @param name
+         *            the name
+         * @return the string
+         */
+        static String addUnderscoredAndCovertToUppercase(final String name) {
+
+            return ImprovedNamingStrategy.addUnderscores(name).toLowerCase();
+        }
     }
 
 }

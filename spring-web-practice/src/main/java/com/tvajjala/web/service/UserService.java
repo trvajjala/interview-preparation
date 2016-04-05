@@ -1,8 +1,8 @@
 package com.tvajjala.web.service;
 
-import com.tvajjala.exception.RecordNotFoundException;
+import com.tvajjala.exception.ResourceNotFoundException;
 import com.tvajjala.exception.ServiceException;
-import com.tvajjala.vo.User;
+import com.tvajjala.persistence.vo.User;
 
 /**
  * The Interface UserService.
@@ -12,9 +12,9 @@ public interface UserService {
     /**
      * @param id
      *            primary key
-     * @throws RecordNotFoundException
+     * @throws ResourceNotFoundException
      */
-    void deleteUser(Long id) throws RecordNotFoundException;
+    void deleteUser(Long id) throws ResourceNotFoundException;
 
     /**
      * Encrypt password.
@@ -34,7 +34,17 @@ public interface UserService {
     /**
      * @param user
      * @return updated user
-     * @throws RecordNotFoundException
+     * @throws ResourceNotFoundException
      */
-    User updateUser(User user) throws RecordNotFoundException;
+    User updateUser(User user) throws ResourceNotFoundException;
+
+    /**
+     *
+     * @param username
+     * @return user
+     */
+    User getUserByUsername(String username);
+
+    public long getUserCount();
+
 }

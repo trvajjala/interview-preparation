@@ -1,7 +1,7 @@
 package com.tvajjala.exception;
 
 /**
- * @author ThirupathiReddy Vajjala
+ * @author ThirupathiReddy V
  *
  */
 public class ServiceException extends Exception {

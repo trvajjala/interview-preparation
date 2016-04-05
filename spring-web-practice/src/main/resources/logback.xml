@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
-<configuration>
+<configuration debug="false" scan="true"> 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d %5p [LINE:%L]  %-55logger{55} | %m %n</pattern>
 		</encoder>
 	</appender>
+
 	<logger name="com.tvajjala">
 		<level value="DEBUG" />
 	</logger>
 	
 	<logger name="org.springframework">
+		<level value="INFO" />
+	</logger>
+	
+	<logger name="org.hibernate.SQL">
 		<level value="INFO" />
 	</logger>
 	
@@ -21,7 +26,6 @@
 	<logger name="org.hibernate.cfg.beanvalidation.TypeSafeActivator">
 		<level value="WARN" />
 	</logger>
-	
 	
 	<root>
 		<level value="INFO" />

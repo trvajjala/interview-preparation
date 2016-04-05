@@ -22,11 +22,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.tvajjala.domain.AuthorityEntity;
-import com.tvajjala.domain.UserEntity;
-import com.tvajjala.repository.UserRepository;
-import com.tvajjala.vo.Authority;
-import com.tvajjala.vo.User;
+import com.tvajjala.persistence.domain.AuthorityEntity;
+import com.tvajjala.persistence.domain.UserEntity;
+import com.tvajjala.persistence.repository.UserRepository;
+import com.tvajjala.persistence.vo.Authority;
+import com.tvajjala.persistence.vo.User;
 
 /**
  * only deals with authentication

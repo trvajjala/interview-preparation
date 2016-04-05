@@ -11,11 +11,11 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tvajjala.domain.AuthorityEntity;
-import com.tvajjala.domain.EndpointEntity;
-import com.tvajjala.repository.AuthorityRepository;
-import com.tvajjala.repository.EndpointsRepository;
-import com.tvajjala.vo.Authority;
+import com.tvajjala.persistence.domain.AuthorityEntity;
+import com.tvajjala.persistence.domain.EndpointEntity;
+import com.tvajjala.persistence.repository.AuthorityRepository;
+import com.tvajjala.persistence.repository.EndpointsRepository;
+import com.tvajjala.persistence.vo.Authority;
 import com.tvajjala.web.service.AccessControlService;
 
 /**

@@ -22,7 +22,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @NamedQuery(name = "Employee.byId", query = "FROM Employee WHERE id=:id")
 @NamedNativeQuery(name = "Employee.Named.byId", query = "SELECT * FROM Employee WHERE id=:id", resultClass = Employee.class)
 @Cacheable(value = true)
-@Cache(usage = CacheConcurrencyStrategy.NONE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Employee {
 
     @Id

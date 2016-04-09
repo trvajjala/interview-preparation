@@ -43,9 +43,11 @@ public class SecondLevelCacheExample {
         // properties.put("connection.autocommit", "false");
         properties.put("hibernate.cache.use_second_level_cache", "true");
         properties.put("hibernate.cache.use_query_cache", "true");
-        properties.put("hibernate.cache.region.factory_class", org.hibernate.cache.ehcache.EhCacheRegionFactory.class.getName());
+        properties.put("org.hibernate.cache.ehcache.configurationResourceName", "ehcache.xml");
+        properties.put("hibernate.cache.region.factory_class", org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory.class.getName());
+
         properties.put("hibernate.connection.datasource", dataSource());
-        // ISOLATION LEVEL
+        // ISOLATION LEVEL -it take default isolation level of DS
         properties.put("hibernate.connection.isolation", Connection.TRANSACTION_READ_UNCOMMITTED);
 
         return properties;

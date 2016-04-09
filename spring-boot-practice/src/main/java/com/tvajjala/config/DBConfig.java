@@ -1,4 +1,4 @@
-package com.tvajjala.web.config;
+package com.tvajjala.config;
 
 import java.util.Properties;
 
@@ -22,30 +22,13 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.config.MulticastConfig;
-import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 import com.jolbox.bonecp.BoneCPDataSource;
 import com.tvajjala.persistence.domain.UserEntity;
 
-/**
- * Spring Data JPA associates the implementation class with the interface because the implementation’s name is based on the name of the interface. The Impl
- * post-fix is only the default, though. If you’d prefer to use some other post-fix, you need to specify it when configuring @EnableJpaRepositories by setting
- * the repository-ImplementationPostfix attribute:
- *
- * @EnableJpaRepositories( basePackages=""com.tvajjala.persistence.repository", repositoryImplementationPostfix="Helper")
- * @author ThirupathiReddy V
- *
- */
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackages = { "com.tvajjala.persistence.repository" }, repositoryImplementationPostfix = "Helper", transactionManagerRef = "transactionManager")
 @EnableTransactionManagement
-// @ImportResource(value = { "classpath:cache-context.xml" })
-// hazel-cast configuration in XML
-public class DatabaseConfig {
+public class DBConfig {
 
     /**
      * spring boot looks for the bean with name 'dataSource'.if not found it will check application.properties from the class-path try to create one dataSource
@@ -163,25 +146,6 @@ public class DatabaseConfig {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory());
         return transactionManager;
-    }
-
-    @Bean
-    public HazelcastInstance hazelcastInstance() {
-        final Config config = new Config();
-        final GroupConfig groupConfig = new GroupConfig();
-        groupConfig.setName("trvajjala");
-        groupConfig.setPassword("trvajjala");
-        config.setGroupConfig(groupConfig);
-
-        final NetworkConfig networkConfig = config.getNetworkConfig();
-        final MulticastConfig multicastConfig = new MulticastConfig();
-        multicastConfig.setEnabled(false);
-        networkConfig.getJoin().setMulticastConfig(multicastConfig);
-        networkConfig.getJoin().getAwsConfig().setEnabled(false);
-        networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
-
-        final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
-        return hazelcastInstance;
     }
 
     /**

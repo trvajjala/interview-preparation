@@ -1,36 +1,34 @@
-package com.tvajjala.web.config;
+package com.tvajjala.config;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.dao.ReflectionSaltSource;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
@@ -47,46 +45,43 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.DelegatingFilterProxy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
-import com.tvajjala.web.auth.provider.HibernateAuthenticationProvider;
+import com.tvajjala.security.auth.filter.JSONPayloadAuthenticationFilter;
+import com.tvajjala.security.auth.provider.JPAAuthenticationProvider;
 import com.tvajjala.web.service.AccessControlService;
-import com.tvajjala.web.service.AuthenticationService;
 
-/**
- * the @EnableWebMvcSecurity annotation configures a Spring MVC argument resolver <br>
- * so that handler methods can receive the authenticated user’s principal (or username)<br>
- * via @AuthenticationPrincipal-annotated parameters.<br>
- * It also configures a bean that automatically adds a hidden cross-site request forgery (CSRF) <br>
- * token field on forms using Spring’s form-binding tag library.
- *
- * https://www.safaribooksonline.com/blog/2013/10/08/secure-rest-services-with-spring-security/
- *
- * @author ThirupathiReddy V
- *
- */
+@EnableWebSecurity(debug = true)
 @Configuration
-@EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    /** The logger */
-    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+    @Bean()
+    FilterRegistrationBean FilterRegistrationBean() {
+        final FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new DelegatingFilterProxy("springSecurityFilterChain"));
+        filterRegistrationBean.setName("springSecurityFilterChain");
+        filterRegistrationBean.addUrlPatterns("/api/*");
+        return filterRegistrationBean;
+    }
 
-    @Autowired
-    private AuthenticationService authenticationService;
-
+    // https://docs.spring.io/spring-security/site/docs/3.0.x/reference/security-filter-chain.html
     @Bean(name = "springSecurityFilterChain")
     public FilterChainProxy springSecurityFilterChain() throws ServletException, Exception {
 
         final List<SecurityFilterChain> listOfFilterChains = new ArrayList<SecurityFilterChain>();
-        // listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/login"), new NoSecurityFilter()));
 
+        listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/cors")));
+        listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/dump")));
         listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/validatorUrl")));
         listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/swagger-resources")));
         listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/configuration/ui")));
@@ -96,25 +91,54 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/webjars/**")));
         // no filters
         listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/webjars/**")));// no filters
-        listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/**"), securityContextPersistenceFilterWithASCFalse(),
-                exceptionTranslationFilter(), filterSecurityInterceptor()));
+        listOfFilterChains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/api/*"), securityContextPersistenceFilterWithASCFalse(),
+                usernamePasswordAuthenticationFilter(), sessionManagementFilter(), exceptionTranslationFilter(), filterSecurityInterceptor()));
 
         final FilterChainProxy filterChainProxy = new FilterChainProxy(listOfFilterChains);
 
         return filterChainProxy;
     }
 
-    // don't add @Bean annotation for the below three definitions. spring boot create new mapping for that
-    // which violates the security
+    // allow session creation false
     public SecurityContextPersistenceFilter securityContextPersistenceFilterWithASCFalse() {
-        logger.info("securityContextPersistenceFilterWithASCFalse");
         // return new SecurityContextPersistenceFilter(new HttpSessionSecurityContextRepository());// this stores token in httpSession
         return new SecurityContextPersistenceFilter(statelessSecurityContextRepository());
     }
 
-    @Bean
-    public StatelessSecurityContextRepository statelessSecurityContextRepository() {
-        return new StatelessSecurityContextRepository();
+    @Autowired
+    private HazelcastInstance hazelcastInstance;
+
+    @Autowired
+    private ObjectMapper jacksonObjectMapper;
+
+    public JSONPayloadAuthenticationFilter usernamePasswordAuthenticationFilter() throws Exception {
+        // final UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter = new UsernamePasswordAuthenticationFilter();
+        final JSONPayloadAuthenticationFilter usernamePasswordAuthenticationFilter = new JSONPayloadAuthenticationFilter();
+        usernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManager());
+        usernamePasswordAuthenticationFilter.setJacksonObjectMapper(jacksonObjectMapper);
+        usernamePasswordAuthenticationFilter.setHazelcastInstance(hazelcastInstance);
+        return usernamePasswordAuthenticationFilter;
+    }
+
+    @Override
+    protected AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
+    }
+
+    public AnonymousAuthenticationFilter anonymousAuthenticationFilter() {
+        final AnonymousAuthenticationFilter anonymousAuthenticationFilter = new AnonymousAuthenticationFilter("tvajjala");
+        return anonymousAuthenticationFilter;
+    }
+
+    public SessionManagementFilter sessionManagementFilter() {
+        final SessionManagementFilter sessionManagementFilter = new SessionManagementFilter(statelessSecurityContextRepository());
+        return sessionManagementFilter;
+    }
+
+    public ExceptionTranslationFilter exceptionTranslationFilter() {
+        final ExceptionTranslationFilter exceptionTranslationFilter = new ExceptionTranslationFilter(new RestAuthenticationEntryPoint());
+        exceptionTranslationFilter.setAccessDeniedHandler(new AuthorizationFailHandler());
+        return exceptionTranslationFilter;
     }
 
     public FilterSecurityInterceptor filterSecurityInterceptor() throws Exception {
@@ -137,63 +161,106 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public SecureResouceMetadataSource secureResouceMetadataSource() {
-        return new SecureResouceMetadataSource();
+        return new SecureResouceMetadataSource();// gives allowed roles
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.debug(true);// This has no effect since we overridden the springSecurityFilterChain bean definition
+    }
+
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(authenticationProvider());// custom authentication provider
     }
 
     @Override
     @Bean
-    // this be need to be there to avoid spring boot to configure its own default configuration
-    public AuthenticationManager authenticationManager() throws Exception {
-
-        return super.authenticationManager();
-    }
-
-    public ExceptionTranslationFilter exceptionTranslationFilter() {
-        final ExceptionTranslationFilter exceptionTranslationFilter = new ExceptionTranslationFilter(new RestAuthenticationEntryPoint());
-        exceptionTranslationFilter.setAccessDeniedHandler(new AuthorizationFailHandler());
-        return exceptionTranslationFilter;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Bean
-    public HibernateAuthenticationProvider authenticationProvider() {
-        return new HibernateAuthenticationProvider();
+    public AuthenticationProvider authenticationProvider() {
+        return new JPAAuthenticationProvider();
     }
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-        System.out.println("http Security configuration");// suppress default configuration
+    @Bean
+    public StatelessSecurityContextRepository statelessSecurityContextRepository() {
+        return new StatelessSecurityContextRepository();
     }
 
     @Bean
     public ShaPasswordEncoder passwordEncoder() {
-        return new ShaPasswordEncoder();
+        return new ShaPasswordEncoder();// argument can put 256 for SHA-256
     }
 
     @Bean
     public ReflectionSaltSource saltSource() {
+
         final ReflectionSaltSource reflectionSaltSource = new ReflectionSaltSource();
         reflectionSaltSource.setUserPropertyToUse("username");
-        return reflectionSaltSource;
-    }
 
-    @Bean
-    public ServletRegistrationBean servletRegistrationBean() {
-        return new ServletRegistrationBean(new LoginServlet(), "/login");
+        return reflectionSaltSource;
     }
 
 }
 
-class NoSecurityFilter extends GenericFilterBean {
+/**
+ * This core implementation for authentication check using tokens.<br>
+ * It is replacement of {@link HttpSessionSecurityContextRepository} which store security context in session which we are no longer required
+ *
+ * @author ThirupathiReddy V
+ */
+class StatelessSecurityContextRepository implements SecurityContextRepository {
+
+    /** The logger. */
+    private static final Logger logger = LoggerFactory.getLogger(StatelessSecurityContextRepository.class);
+
+    @Autowired
+    private HazelcastInstance hazelcastInstance;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        System.err.println("  no security applied  ");
+    public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
+        final String authToken = getToken(requestResponseHolder.getRequest());
+
+        if (authToken == null || hazelcastInstance.getMap("userTokenMap").get(authToken) == null) {
+            logger.info("Returning empty securityContext");
+            return SecurityContextHolder.createEmptyContext();
+        } else {
+            logger.info("Returning valid securityContext");
+            return (SecurityContext) hazelcastInstance.getMap("userTokenMap").get(authToken);
+        }
+    }
+
+    @Override
+    public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
+        final String authToken = getToken(request);
+
+        if (authToken != null) {
+            logger.info("Saving authentication token in the cache " + authToken + "  with securityContext = " + context);
+            hazelcastInstance.getMap("userTokenMap").put(authToken, context, 30, TimeUnit.MINUTES);
+        }
+    }
+
+    @Override
+    public boolean containsContext(HttpServletRequest request) {
+        final String authToken = getToken(request);
+
+        return authToken != null && hazelcastInstance.getMap("userTokenMap").containsKey(authToken);
+    }
+
+    static String getToken(HttpServletRequest request) {
+
+        String authToken = request.getHeader("x-auth-token");
+
+        if (authToken == null) {
+            authToken = request.getParameter("x-auth-token");
+        } else {
+            logger.info("Received authentication token in header / or query parameter with key x-auth-token = " + authToken);
+        }
+
+        return authToken;
     }
 
 }
@@ -253,7 +320,7 @@ class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         logger.warn("Authentication fails");
 
-        final String msg = msgList.contains(exception.getMessage()) ? "invalid token entered or token expire " : exception.getMessage();
+        final String msg = msgList.contains(exception.getMessage()) ? "Invalid token entered or token expire " : exception.getMessage();
         response.setContentType("application/json");
         try (PrintWriter writer = response.getWriter()) {
             writer.write("{\"status\":\"200\",\"msg\":\"" + msg + "\"}");
@@ -359,70 +426,6 @@ class GenericAccessDecisionManager implements AccessDecisionManager {
     public boolean supports(final Class<?> clazz) {
 
         return true;
-    }
-
-}
-
-/**
- * This core implementation for authentication check using tokens.<br>
- * It is replacement of {@link HttpSessionSecurityContextRepository} which store security context in session which we are no longer required
- *
- * @author ThirupathiReddy V
- */
-class StatelessSecurityContextRepository implements SecurityContextRepository {
-
-    /** The logger. */
-    private static final Logger logger = LoggerFactory.getLogger(StatelessSecurityContextRepository.class);
-
-    @Autowired
-    private HazelcastInstance hazelcastInstance;
-
-    @Override
-    public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
-        final String authToken = getToken(requestResponseHolder.getRequest());
-        logger.debug("Reading security context token : " + authToken);
-
-        if (authToken == null || hazelcastInstance.getMap("userTokenMap").get(authToken) == null) {
-            logger.debug("Returning empty securityContext");
-            return SecurityContextHolder.createEmptyContext();
-        } else {
-            logger.info("Returning valid securityContext");
-            return (SecurityContext) hazelcastInstance.getMap("userTokenMap").get(authToken);
-        }
-    }
-
-    @Override
-    public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-        final String authToken = getToken(request);
-
-        if (authToken != null) {
-            hazelcastInstance.getMap("userTokenMap").put(authToken, context, 30, TimeUnit.MINUTES);
-        }
-    }
-
-    @Override
-    public boolean containsContext(HttpServletRequest request) {
-        final String authToken = getToken(request);
-        return hazelcastInstance.getMap("userTokenMap").containsKey(authToken);
-    }
-
-    static String getToken(HttpServletRequest request) {
-
-        final Enumeration<String> headers = request.getHeaderNames();
-
-        while (headers.hasMoreElements()) {
-
-            System.err.println(headers.nextElement() + "    =   " + request.getHeader(headers.nextElement()));
-
-        }
-
-        String authToken = request.getHeader("x-auth-token");
-
-        if (authToken == null) {
-            authToken = request.getParameter("x-auth-token");
-        }
-
-        return authToken;
     }
 
 }

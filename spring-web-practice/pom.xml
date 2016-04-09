@@ -38,6 +38,13 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
+		
+		
+		<dependency>
+			<groupId>com.jolbox</groupId>
+			<artifactId>bonecp</artifactId>
+			<version>0.8.0.RELEASE</version>
+		</dependency>
 
 
 		<dependency>
@@ -81,11 +88,6 @@
 			<artifactId>spring-security-oauth2</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.jolbox</groupId>
-			<artifactId>bonecp</artifactId>
-			<version>0.8.0.RELEASE</version>
-		</dependency>
 
 		<dependency>
 			<artifactId>hazelcast-all</artifactId>

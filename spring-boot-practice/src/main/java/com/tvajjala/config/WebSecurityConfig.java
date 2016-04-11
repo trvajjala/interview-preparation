@@ -27,7 +27,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.authentication.dao.ReflectionSaltSource;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -62,7 +61,7 @@ import com.tvajjala.web.service.AccessControlService;
 
 @EnableWebSecurity(debug = true)
 @Configuration
-@EnableGlobalMethodSecurity(securedEnabled = true)
+// @EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean()
@@ -316,7 +315,7 @@ class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
      */
     @Override
     public void commence(final HttpServletRequest request, final HttpServletResponse response, final AuthenticationException exception) throws IOException,
-            ServletException {
+    ServletException {
 
         logger.warn("Authentication fails");
 

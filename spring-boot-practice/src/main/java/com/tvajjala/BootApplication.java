@@ -14,8 +14,9 @@ import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * If want to deploy boot application into external tomcat this must extend SpringBootServletInitializer. servlet 3.0 container looks for instance of this
- * class.
+ * If you want to deploy spring boot application into external TOMCAT. <br>
+ * there must be on class SpringBootServletInitializer. <br>
+ * SERVLET 3.0 container looks for instance of this class.
  *
  * @author ThirupathiReddy V
  *
@@ -26,6 +27,7 @@ public class BootApplication extends SpringBootServletInitializer {
     @Override
     public WebApplicationContext createRootApplicationContext(ServletContext servletContext) {
         return super.createRootApplicationContext(servletContext);
+
     }
 
     @Override
@@ -33,8 +35,11 @@ public class BootApplication extends SpringBootServletInitializer {
         return builder.sources(BootApplication.class);
     }
 
-    public static void main(String[] args) {
+    // The metacharacters supported by the regular expressions in Java are as follows:
 
+    // ( ) [ ] { { \ ^ $ | ? * + . < > - = !
+
+    public static void main(String args[]) {
         final SpringApplication application = new SpringApplication(BootApplication.class);
         final Properties properties = new Properties();
         properties.put("server.servletPath", "/api/*");// dispatch Servlet path can be set here

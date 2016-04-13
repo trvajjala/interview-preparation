@@ -62,14 +62,12 @@ public class LifeCycleBean implements BeanNameAware, BeanFactoryAware, Applicati
 
     @Override
     public void setBeanFactory(BeanFactory arg0) throws BeansException {
-
         System.err.println("setBeanFactory " + arg0);
     }
 
     @Override
     public void setApplicationContext(ApplicationContext arg0) throws BeansException {
         System.err.println("appCtx " + arg0);
-
     }
 
 }

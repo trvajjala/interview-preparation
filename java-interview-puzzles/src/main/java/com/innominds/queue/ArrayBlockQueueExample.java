@@ -33,11 +33,9 @@ public class ArrayBlockQueueExample {
 
         while (true) {
 
-            System.out.println("Adding element ");
-
             for (int i = 0; i < 5; i++) {
                 abq.put(i);
-                abq.put(i);
+                System.out.println("New Element Added");
             }
 
         }

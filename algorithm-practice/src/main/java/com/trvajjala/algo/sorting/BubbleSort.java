@@ -9,7 +9,7 @@ public class BubbleSort {
 
     public static void main(String[] args) {
         final int[] array = { 3, 4, 5, 22, 9, 2, 44, 1212, 2222 };
-        Arrays.stream(doBubbleSort(array)).forEach(i -> System.out.print(i + " "));
+        Arrays.stream(doBubbleSort(array)).forEach(System.out::print);
     }
 
     public static int[] doBubbleSort(int[] array) {

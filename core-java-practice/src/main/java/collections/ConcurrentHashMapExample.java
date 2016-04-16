@@ -2,6 +2,8 @@ package collections;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * – ConcurrentHashMap is similar to Hashtable, but performs better in a multi-threaded environment as it does not block itself to be access by a single thread
@@ -33,5 +35,18 @@ public class ConcurrentHashMapExample {
             System.out.println(K + " = " + V);
         });
 
+        final Consumer<String> con = ConcurrentHashMapExample::some;
+        final Predicate<String> s = ConcurrentHashMapExample::isTrue;
+        con.accept("SSS");
     }
+
+    static void some(String hello) {
+        System.out.println(hello);
+    }
+
+    static boolean isTrue(String name) {
+
+        return true;
+    }
+
 }

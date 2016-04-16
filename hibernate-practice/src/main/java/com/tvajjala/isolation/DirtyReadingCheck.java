@@ -26,7 +26,6 @@ public class DirtyReadingCheck {
     static void insertRecord(SessionFactory sessionFactory, String data) {
 
         final Session session1 = sessionFactory.openSession();
-
         final Transaction tx1 = session1.getTransaction();
         tx1.begin();
         session1.persist(new User(data));

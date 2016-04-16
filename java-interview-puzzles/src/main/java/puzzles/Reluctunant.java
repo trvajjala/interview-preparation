@@ -11,7 +11,7 @@ public class Reluctunant {
 
         try {
             new Reluctunant();
-            System.out.println("Supprise");
+            System.out.println("Surprise");
         } catch (final Exception e) {
             // e.printStackTrace();
             System.out.println("You got error ");

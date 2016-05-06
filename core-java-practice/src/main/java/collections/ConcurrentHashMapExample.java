@@ -3,7 +3,6 @@ package collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * – ConcurrentHashMap is similar to Hashtable, but performs better in a multi-threaded environment as it does not block itself to be access by a single thread
@@ -36,8 +35,14 @@ public class ConcurrentHashMapExample {
         });
 
         final Consumer<String> con = ConcurrentHashMapExample::some;
-        final Predicate<String> s = ConcurrentHashMapExample::isTrue;
         con.accept("SSS");
+
+        try {
+            Thread.currentThread().join();
+        } catch (final InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     static void some(String hello) {

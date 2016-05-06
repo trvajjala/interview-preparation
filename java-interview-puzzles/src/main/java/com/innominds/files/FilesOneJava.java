@@ -27,6 +27,7 @@ public class FilesOneJava {
         final Stream<String> s = Files.lines(Paths.get(new URI("file:/Volumes/DATA/Main.java")));
         final List<?> li = s.collect(Collectors.toList());
         System.out.println(li);
+        s.close();
 
         final BufferedReader breader = new BufferedReader(new InputStreamReader(new FileInputStream("/Volumes/DATA/Main.java")));
         breader.lines().forEach(System.err::print);

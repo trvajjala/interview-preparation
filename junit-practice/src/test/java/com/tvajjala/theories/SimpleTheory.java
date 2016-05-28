@@ -14,7 +14,7 @@ public class SimpleTheory {
     // @DataPoint
     // public static String designation = "Developer";
     @DataPoints
-    public static String[] data = new String[] { "one", "two" };
+    public static String[] data = new String[] { "one" };
 
     @Theory
     public void sanityCheck(String name, String de) {

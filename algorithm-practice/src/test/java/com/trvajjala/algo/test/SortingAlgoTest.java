@@ -3,9 +3,9 @@ package com.trvajjala.algo.test;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.trvajjala.algo.sorting.BubbleSort;
-import com.trvajjala.algo.sorting.MergeSort;
-import com.trvajjala.algo.sorting.SelectionSort;
+import com.tvajjala.sorting.BubbleSort;
+import com.tvajjala.sorting.MergeSort;
+import com.tvajjala.sorting.SelectionSort;
 
 public class SortingAlgoTest {
 

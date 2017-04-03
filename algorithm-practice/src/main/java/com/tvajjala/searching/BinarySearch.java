@@ -1,4 +1,4 @@
-package com.trvajjala.algo.searching;
+package com.tvajjala.searching;
 
 public class BinarySearch {
 

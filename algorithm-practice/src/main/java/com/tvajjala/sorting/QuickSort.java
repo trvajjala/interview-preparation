@@ -1,4 +1,4 @@
-package com.trvajjala.algo.sorting;
+package com.tvajjala.sorting;
 
 import java.util.Arrays;
 

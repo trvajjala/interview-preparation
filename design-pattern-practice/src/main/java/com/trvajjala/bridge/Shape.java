@@ -5,12 +5,11 @@ public abstract class Shape {
     protected ColorImplementor colorImplementor;
 
     protected void setColor(ColorImplementor colorImplementor) {
-        this.colorImplementor = colorImplementor;
-
+	this.colorImplementor = colorImplementor;
     }
 
     protected ColorImplementor getColorImplementor() {
-        return colorImplementor;
+	return colorImplementor;
     }
 
     public abstract void colorIt();

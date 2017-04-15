@@ -3,13 +3,11 @@ package com.tvajjala.questions;
 /**
  * @formatter:off
  *
- *    Worst case = O(n^3)
- *    Best  case = O(n^2)  sort the array before
+ *  Worst case = O(n^3)
+ *  Best case = O(n^2) sort the array before
  *
  * @formatter:on
- *
  * @author ThirupathiReddy V
- *
  */
 public class SumOfThreeDigits {
 
@@ -24,9 +22,8 @@ public class SumOfThreeDigits {
                 for ( int k = j + 1; k < input.length; k++ ) {
 
                     if ( input[i] + input[j] + input[k] == 0 ) {
-
                         System.out.println( String.format( "Elements %d , %d and  %d whose sum is equals to zero ", input[i], input[j], input[k] ) );
-                        return;
+                        return;// comment this line to get all possible combinations
                     }
                 }
             }

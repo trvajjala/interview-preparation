@@ -10,20 +10,19 @@ public class BridgeExample {
 
     public static void main(String[] args) {
 
-        final Shape rectangleShape = new Rectangle();
+	final Shape rectangleShape = new Rectangle();
 
-        final Shape circleShape = new Circle();
+	final Shape circleShape = new Circle();
 
-        rectangleShape.setColor(new GreenColorImplementor());
+	rectangleShape.setColor(new GreenColorImplementor());
 
-        circleShape.setColor(new BlueColorImplementor());
+	circleShape.setColor(new BlueColorImplementor());
 
-        circleShape.colorIt();
-        circleShape.draw();
+	circleShape.colorIt();
+	circleShape.draw();
 
-        rectangleShape.colorIt();
-
-        rectangleShape.draw();
+	rectangleShape.colorIt();
+	rectangleShape.draw();
 
     }
 }

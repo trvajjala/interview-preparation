@@ -14,6 +14,9 @@ import java.io.Serializable;
 
 /**
  *
+ *http://thecodersbreakfast.net/index.php?post/2011/05/12/Serialization-and-magic-methods
+ *
+ *https://www.youtube.com/watch?v=GH5_lhFShfU  5:30 duration
  * @author ThirupathiReddy V
  *
  */
@@ -27,39 +30,39 @@ public class MySerialization implements Serializable, ObjectInputValidation {
     private String name;
 
     public void setName(String name) {
-        this.name = name;
+	this.name = name;
     }
 
     public String getName() {
-        return name;
+	return name;
     }
 
     @Override
     public void validateObject() throws InvalidObjectException {
-        System.out.println("Validating Object ");
+	System.out.println("Validating Object ");
     }
 
     public Object readResolve() throws ObjectStreamException {
-        System.out.println("ReadResolve method gets invoked.");
-        return this;
+	System.out.println("ReadResolve method gets invoked.");
+	return this;
     }
 
     public Object writeReplace() throws ObjectStreamException {
-        System.out.println("WriteReplace method gets invoked.");
-        return this;
+	System.out.println("WriteReplace method gets invoked.");
+	return this;
     }
 
     // This two method must be private
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        System.out.println("WriteObject method gets invoked.");
-        oos.defaultWriteObject();
+	System.out.println("WriteObject method gets invoked.");
+	oos.defaultWriteObject();
     }
 
     // This two method must be private
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        System.out.println("ReadObject method gets invoked.");
-        ois.registerValidation(this, 0);
-        ois.defaultReadObject();
+	System.out.println("ReadObject method gets invoked.");
+	ois.registerValidation(this, 0);
+	ois.defaultReadObject();
     }
 
 }
@@ -68,36 +71,36 @@ class SerTest {
 
     public static void main(String[] args) throws Exception {
 
-        final MySerialization ser = new MySerialization();
-        ser.setName("Thiru");
+	final MySerialization ser = new MySerialization();
+	ser.setName("Thiru");
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("test.ser"))) {
-            oos.writeObject(ser);
-        }
+	try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("test.ser"))) {
+	    oos.writeObject(ser);
+	}
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("test.ser"))) {
-            final MySerialization ss = (MySerialization) ois.readObject();
-            System.out.println(ss.getName());
-        }
+	try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("test.ser"))) {
+	    final MySerialization ss = (MySerialization) ois.readObject();
+	    System.out.println(ss.getName());
+	}
 
-        deserialize(serialize(ser));
+	deserialize(serialize(ser));
 
     }
 
     private static byte[] serialize(Object o) throws IOException {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(o);
-        oos.flush();
-        oos.close();
-        return baos.toByteArray();
+	final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	final ObjectOutputStream oos = new ObjectOutputStream(baos);
+	oos.writeObject(o);
+	oos.flush();
+	oos.close();
+	return baos.toByteArray();
     }
 
     private static Object deserialize(byte[] bytes) throws ClassNotFoundException, IOException {
-        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        final ObjectInputStream ois = new ObjectInputStream(bais);
-        final Object o = ois.readObject();
-        ois.close();
-        return o;
+	final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+	final ObjectInputStream ois = new ObjectInputStream(bais);
+	final Object o = ois.readObject();
+	ois.close();
+	return o;
     }
 }

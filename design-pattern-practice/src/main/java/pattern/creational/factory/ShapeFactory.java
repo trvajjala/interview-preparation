@@ -9,21 +9,19 @@ package pattern.creational.factory;
  */
 public class ShapeFactory {
 
-    public static Shape getShape(String type) {
+    public static Shape getShape(Shape.TYPE type) {
 
-        if ("Circle".equalsIgnoreCase(type)) {
-            return new Circle();
-        } else if ("Square".equalsIgnoreCase(type)) {
-            return new Square();
-        } else if ("Rectangle".equalsIgnoreCase(type)) {
-            return new Rectangle();
-        }
-        return null;
+	if ("CIRCLE".equalsIgnoreCase(type.name())) {
+	    return new Circle();
+	} else if ("SQUARE".equalsIgnoreCase(type.name())) {
+	    return new Square();
+	} else if ("RECTANGLE".equalsIgnoreCase(type.name())) {
+	    return new Rectangle();
+	}
+
+	throw new RuntimeException("Invalid argument passed ");
     }
 
-    public static void main(String[] args) {
-        final Shape shape = ShapeFactory.getShape("Circle");
-        System.out.println(shape);
-    }
+
 
 }

@@ -66,6 +66,10 @@ class SingletonTest {
 
     public static void main(String[] args) throws Exception {
 
+
+	System.out.println(Runtime.getRuntime().hashCode());
+	System.out.println(Runtime.getRuntime().hashCode());
+
 	final BestSingleton bestSingleton = BestSingleton.getInstance();
 
 	System.out.println("  bestSingleton : " + bestSingleton.hashCode());

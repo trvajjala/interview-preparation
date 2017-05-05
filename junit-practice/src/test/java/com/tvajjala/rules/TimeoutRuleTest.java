@@ -2,9 +2,12 @@ package com.tvajjala.rules;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
+
+
 
 public class TimeoutRuleTest {
 
@@ -16,7 +19,8 @@ public class TimeoutRuleTest {
 
     @Test
     public void simpleTest() throws InterruptedException {
-        Thread.sleep(30);
+	Thread.sleep(30);
+	Assert.assertEquals(true, true);
     }
 
 }

@@ -7,6 +7,7 @@ public class AssertObjectArrayTestDeprecation {
 
     @Test
     public void test() {
-        Assert.assertEquals(new Object[] { 4, 5 }, new Object[] { 4, 5 });
+	Assert.assertArrayEquals(new Object[] { 4, 5 }, new Object[] { 4, 5 });
+	//Assert.assertEquals(new Object[] { 4, 5 }, new Object[] { 4, 5 });
     }
 }

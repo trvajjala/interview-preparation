@@ -22,44 +22,45 @@ public class DriverManagerConnectionProvider {
     private static SessionFactory sessionFactory;
 
     static Properties getProperties() {
-        final Properties properties = new Properties();
-        properties.put("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
-        properties.put("hibernate.connection.url", "jdbc:mysql://localhost:3306/test");
-        properties.put("hibernate.connection.username", "root");
-        properties.put("hibernate.connection.password", "admin");
-        properties.put("hibernate.dialect", org.hibernate.dialect.MySQL5InnoDBDialect.class.getName());
-        properties.put("hibernate.hbm2ddl.auto", "create-drop");
-        properties.put("hibernate.show_sql", "true");
-        // Isolation level
-        properties.put("hibernate.connection.isolation", Connection.TRANSACTION_SERIALIZABLE);
+	final Properties properties = new Properties();
+	properties.put("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+	properties.put("hibernate.connection.url", "jdbc:mysql://localhost:3306/test");
+	properties.put("hibernate.connection.username", "root");
+	properties.put("hibernate.connection.password", "admin");
+	properties.put("hibernate.dialect", org.hibernate.dialect.MySQL5InnoDBDialect.class.getName());
+	properties.put("hibernate.hbm2ddl.auto", "create-drop");
+	properties.put("hibernate.show_sql", "true");
+	// Isolation level
+	properties.put("hibernate.connection.isolation", Connection.TRANSACTION_SERIALIZABLE);
 
-        return properties;
+	return properties;
     }
 
     static {
-        final Configuration configuration = new Configuration();
-        configuration.addProperties(getProperties());
-        configuration.addAnnotatedClass(com.tvajjala.domain.User.class);
-        final StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
-        sessionFactory = configuration.buildSessionFactory(builder.build());
+	final Configuration configuration = new Configuration();
+	configuration.addProperties(getProperties());
+	configuration.addAnnotatedClass(com.tvajjala.domain.User.class);
+	final StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder()
+		.applySettings(configuration.getProperties());
+	sessionFactory = configuration.buildSessionFactory(builder.build());
     }
 
     public static SessionFactory getSessionFactory() {
-        return sessionFactory;
+	return sessionFactory;
     }
 
     public static void main(String[] args) {
 
-        final SessionFactory sessionFactory = getSessionFactory();
+	final SessionFactory sessionFactory = getSessionFactory();
 
-        final Session session = sessionFactory.openSession();
+	final Session session = sessionFactory.openSession();
 
-        session.doWork(connection -> {
-            System.out.println(Environment.isolationLevelToString(connection.getTransactionIsolation()));
-        });
+	session.doWork(connection -> {
+	    System.out.println(Environment.isolationLevelToString(connection.getTransactionIsolation()));
+	});
 
-        session.close();
-        sessionFactory.close();
+	session.close();
+	sessionFactory.close();
     }
 
 }

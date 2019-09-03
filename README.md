@@ -1,2 +1,2 @@
-# interview-preparation
-This Repository contains interview preparation material for any java fresher to experienced person.
+# Java-applications
+This Repository contains java spring based application 
